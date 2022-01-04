@@ -1,8 +1,50 @@
-title: Marius Volkhart
-description: Android Developer at PKWARE, Inc.
-google_analytics: 
-show_downloads: true
-theme: jekyll-theme-cayman
+title: Marius' Blog
+# tagline:
+description: A blog about software probably
+remote_theme: "mmistakes/so-simple-theme@3.2.0"
+locale: "en-US"
+url: "https://mariusvolkhart.github.io"
+skin: "/assets/css/skins/default.css"
 
-gems:
+read_time: true
+words_per_minute: 150
+
+search_full_content: true
+
+
+plugins:
   - jekyll-mentions
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+# Site Author
+author:
+  name: "Marius Volkhart"
+  twitter: MariusVolkhart
+
+twitter:
+  username: MariusVolkhart
+  card: summary
+
+# Footer Links
+footer_links:
+  - title: Twitter
+    url: https://twitter.com/MariusVolkhart
+    icon: fab fa-twitter-square
+  - title: GitHub
+    url: https://github.com/MariusVolkhart
+    icon: fab fa-github-square
+  - title: Feed
+    url: atom.xml
+    icon: fas fa-rss-square
+
+feed:
+  path: atom.xml
+
+# webmaster_verifications:
+
+social:
+  links:
+    - https://twitter.com/MariusVolkhart
+    - https://github.com/MariusVolkhart
