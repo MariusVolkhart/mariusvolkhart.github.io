@@ -5,6 +5,7 @@ remote_theme: "mmistakes/so-simple-theme@3.2.0"
 locale: "en-US"
 url: "https://mariusvolkhart.github.io"
 skin: "/assets/css/skins/default.css"
+markdown: kramdown
 
 read_time: true
 words_per_minute: 150
