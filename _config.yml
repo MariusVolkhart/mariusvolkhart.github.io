@@ -42,6 +42,12 @@ footer_links:
 
 feed:
   path: atom.xml
+  
+permalink: /:title.html
+
+# Taxonomy pages
+category_archive_path: "/categories/#"
+tag_archive_path: "/tags/#"
 
 # webmaster_verifications:
 
