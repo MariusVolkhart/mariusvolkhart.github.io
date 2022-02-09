@@ -9,14 +9,14 @@ tags:
 last_modified_at: 2022-02-08T19:20:55-05:00
 ---
 
-The other day, my team at [PKWARE] received a report that the latest version of our library had triggered their I/O performance benchmarks. The new version of our Java library showed a spike in IO operations for a given task.
+The other day, my team at [PKWARE] received a report that the latest version of our library had triggered their I/O performance benchmarks. The new version of our Java library showed a spike in I/O operations for a given task.
 
 I knew that the JDK Flight Recorder could be used to diagnose performance issues, but had little experience with it before. I found limited information about diagnosing file I/O, so I thought I'd share what worked for us.
 
 # JFR fundamentals
-JFR uses "profiles" that configure what the recorder should monitor. Mission Control ([JMC]) calls these "Templates", but Intellij IDEA and the JFR option, `-XX:StartFlightRecording` call them "Settings". There are 2 settings that are commonly available: a "default" setting that adds about 1% overhead, and a "profile" setting that adds about 2% overhead.
+JFR uses "profiles" that configure what the recorder should monitor. Mission Control ([JMC]) calls these "Templates", but Intellij IDEA and the `java` option `-XX:StartFlightRecording`, call them "Settings". There are 2 settings that are commonly available: a "default" setting that adds about 1% overhead, and a "profile" setting that adds about 2% overhead.
 
-We tried out both settings, but weren't getting file I/O events in the recording.
+We tried out both settings, but file I/O events weren't getting captured in the recording. JFR samples events, so if events don't happen while the profiler is taking a sample, they won't be recorded.
 
 # Build your own settings
 Fortunately, it's possible to build your own settings file. I think the easiest way to do this is using [JMC], but you could use a text editor - [the file is just XML](https://github.com/openjdk/jdk/blob/d658d945cf57bab8e61302841dcb56b36e48eff3/src/jdk.jfr/share/conf/jfr/default.jfc).
