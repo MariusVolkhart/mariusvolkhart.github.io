@@ -22,25 +22,25 @@ We tried out both settings, but weren't getting file I/O events in the recording
 Fortunately, it's possible to build your own settings file. I think the easiest way to do this is using [JMC], but you could use a text editor - [the file is just XML](https://github.com/openjdk/jdk/blob/d658d945cf57bab8e61302841dcb56b36e48eff3/src/jdk.jfr/share/conf/jfr/default.jfc).
 
 In JMC, open the Flight Recording Template Manager. Start by selecting a running JVM and continue as if you were capturing a flight recording for this VM.
-![Start a flight recording](images/jmc_start_flight_recording.png){: .align-left}
+![Start a flight recording](/images/jmc_start_flight_recording.png){: .align-left}
 
 From the "Start Flight Recording" screen, open the Template Manager.
-![Open the template manager](images/jmc_open_template_manager.png){: .align-left}
+![Open the template manager](/images/jmc_open_template_manager.png){: .align-left}
 
 I found it easiest to duplicate an existing template. I disabled most of the major events, but crucially, I set the "File I/O Threshold" to `0 ns`. This effectivly tells the flight recorder to log an event for every file I/O operation.
-![Export JFR template from JMC](images/configure_jfr_template.png){: .align-left}
+![Export JFR template from JMC](/images/configure_jfr_template.png){: .align-left}
 
 Save your template. At this point, you can proceed to profile using JMC, or, as I did, you can export the template and use it from Intellij.
 
 # Using the template in Intellij
 Export your template to a file.
-![Export JFR template from JMC](images/jmc_export_jfr_template.png){: .align-left}
+![Export JFR template from JMC](/images/jmc_export_jfr_template.png){: .align-left}
 
 Then follow JetBrains' excellent [documentation](https://www.jetbrains.com/help/idea/java-flight-recorder.html) on how to use and configure JFR in Intellij.
 
 # Diagnosis
 
-![JFR results in Intellij](images/jfr_in_intellij.png){: .align-left}
+![JFR results in Intellij](/images/jfr_in_intellij.png){: .align-left}
 The profile showed many small disk reads: 512 bytes each. A bit of stack walking showed that Apache Commons Compress `ZipArchiveInputStream` [uses](https://github.com/apache/commons-compress/blob/39abfb17b02acd7d07b0c3ff5bac666a7bd35ea7/src/main/java/org/apache/commons/compress/archivers/zip/ZipArchiveInputStream.java#L99) a [512 byte](https://github.com/apache/commons-compress/blob/39abfb17b02acd7d07b0c3ff5bac666a7bd35ea7/src/main/java/org/apache/commons/compress/archivers/zip/ZipArchiveOutputStream.java#L89) buffer. It turned out that a `BufferedInputStream` had been missed.
 
 # What's next?
