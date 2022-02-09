@@ -9,9 +9,9 @@ tags:
 last_modified_at: 2022-02-08T19:20:55-05:00
 ---
 
-The other day, my team at [PKWARE] received a report that the latest version of our library had triggered their I/O performance benchmarks. The new version of our Java library showed a spike in I/O operations for a given task.
+The other day, my team at [PKWARE] received a report that the latest version of our library had raised an alarm in their I/O regression tests. I knew that the JDK Flight Recorder could be used to diagnose performance issues, but had little experience with it before. I found limited information about diagnosing file I/O, so I thought I'd share what worked for us.
 
-I knew that the JDK Flight Recorder could be used to diagnose performance issues, but had little experience with it before. I found limited information about diagnosing file I/O, so I thought I'd share what worked for us.
+{% include toc %}
 
 # JFR fundamentals
 JFR uses "profiles" that configure what the recorder should monitor. Mission Control ([JMC]) calls these "Templates", but Intellij IDEA and the `java` option `-XX:StartFlightRecording`, call them "Settings". There are 2 settings that are commonly available: a "default" setting that adds about 1% overhead, and a "profile" setting that adds about 2% overhead.
@@ -40,14 +40,14 @@ Then follow JetBrains' excellent [documentation](https://www.jetbrains.com/help/
 
 # Diagnosis
 
-![JFR results in Intellij](/images/jfr_in_intellij.png){: .align-left}
+[![JFR results in Intellij](/images/jfr_in_intellij.png)](/images/jfr_in_intellij.png)
 The profile showed many small disk reads: 512 bytes each. A bit of stack walking showed that Apache Commons Compress `ZipArchiveInputStream` [uses](https://github.com/apache/commons-compress/blob/39abfb17b02acd7d07b0c3ff5bac666a7bd35ea7/src/main/java/org/apache/commons/compress/archivers/zip/ZipArchiveInputStream.java#L99) a [512 byte](https://github.com/apache/commons-compress/blob/39abfb17b02acd7d07b0c3ff5bac666a7bd35ea7/src/main/java/org/apache/commons/compress/archivers/zip/ZipArchiveOutputStream.java#L89) buffer. It turned out that a `BufferedInputStream` had been missed.
 
 # What's next?
 We're investigating [JFRUnit] as a way of catching such problems sooner in the future. 
 
 ## BTW
-[We're hiring](https://www.linkedin.com/jobs/search/?currentJobId=2848670782&f_C=23724)! Join us in building the libraries that power PKWARE's data detection and security!
+[We're hiring](https://www.linkedin.com/jobs/search/?currentJobId=2848670782&f_C=23724)! Join us in building the libraries that power PKWARE's data detection and security.
 
 [PKWARE]: https://www.pkware.com/careers
 [JMC]: https://adoptium.net/jmc.html
