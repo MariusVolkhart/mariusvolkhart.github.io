@@ -4,10 +4,10 @@ categories:
   - JVM
 tags:
   - Java
-last_modified_at: 2023-03-12T21:40:00-06:00
+last_modified_at: 2023-03-12T22:24:00-06:00
 ---
 
-I asked my colleagues at PKWARE what they dislike most about the JVM. One commented, "relying on a (rather large) runtime." I read that and though, "challenge accepted!"
+I asked my colleagues at PKWARE what they dislike most about the JVM. One commented, "relying on a (rather large) runtime." I read that and thought, "challenge accepted!"
 
 {% include toc %}
 
