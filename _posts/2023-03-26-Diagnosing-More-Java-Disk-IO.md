@@ -7,7 +7,7 @@ tags:
   - JFR
   - Profiling
   - JMC Agent
-last_modified_at: 2023-03-26T12:15:00-05:00
+last_modified_at: 2023-03-26T12:32:00-05:00
 ---
 
 The JDK provides JFR events for file reads and writes. These report the duration of the action and the number of bytes read/written. However, there are many more disk IO operations that are not instrumented, but can nevertheless have a significant impact on the performance characteristics of production applications. Examples include checking whether a file exists, looking up a modified timestamp, and creating a directory. This post explores instrumenting these actions.
@@ -20,7 +20,9 @@ The general approach to instrumenting IO operations is to wrap the real implemen
 ## FileSystemProvider
 The NIO [`FileSystemProvider`] SPI was introducedIn Java 7 as a more flexible approach to writing File IO code. It is possible to write a custom implementation that delegates actual IO operations to the JDK's `FileSystemProvider`, but wraps them with instrumentation logic. By setting the `java.nio.file.spi.DefaultFileSystemProvider` property prior to JVM startup, we can ensure that all `FileSystem`s throughout the JDK use our custom implementation.
 
-However, there are a few downsides to this. Primarily, this approach doesn't help with instrumenting `java.io.File`. There are still a lot of applications, frameworks, and libraries that make use of this API, and ignoring it in our instrumentation is problematic.
+However, there are a few downsides to this. Primarily, this approach doesn't help with instrumenting `java.io.File`. There are still a lot of applications, frameworks, and libraries that make use of this API, and ignoring it in our instrumentation is problematic. It's also a strange level to be instrumenting at, given that not all implementations make use of the local disk. For example, [Jimfs](https://github.com/google/jimfs) and the [AWS Java NIO SPI for S3](https://github.com/awslabs/aws-java-nio-spi-for-s3).
+
+Perhaps there's a better approach.
 
 # JMC Agent
 The JMC Agent is a tool provided by the JMC project. The agent [is configured](https://developers.redhat.com/blog/2020/10/29/collect-jdk-flight-recorder-events-at-runtime-with-jmc-agent#introduction_to_the_jmc_agent_plugin) using an XML file that contains classes and methods to instrument, and reports instrumented events via JFR. The targeted classes have their bytecode modified at runtime and are then reloaded.
@@ -121,3 +123,6 @@ One thing to note about the resulting event, is that that `Path` field of the ev
 
 ### First-class support in JDK
 I've reached out to the JDK JFR mailing list [to propose](https://mail.openjdk.org/pipermail/hotspot-jfr-dev/2023-March/004816.html) expanding the number of events available in the JDK. Perhaps we'll see this functionality added, and application developers will get richer insights into what their applications are doing. If you're interested in this, or have a use case you'd like to share, subscribe to the [mailing list](https://mail.openjdk.org/mailman/listinfo/hotspot-jfr-dev) and send an email with your thoughts!
+
+[`FileSystemProvider`]: https://docs.oracle.com/en/java/javase/20/docs/api/java.base/java/nio/file/spi/FileSystemProvider.html
+[JMC Agent]: https://github.com/openjdk/jmc/blob/master/agent/README.md
