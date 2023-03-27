@@ -7,7 +7,7 @@ tags:
   - JFR
   - Profiling
   - JMC Agent
-last_modified_at: 2023-03-26T12:32:00-05:00
+last_modified_at: 2023-03-26T22:12:00-05:00
 ---
 
 The JDK provides JFR events for file reads and writes. These report the duration of the action and the number of bytes read/written. However, there are many more disk IO operations that are not instrumented, but can nevertheless have a significant impact on the performance characteristics of production applications. Examples include checking whether a file exists, looking up a modified timestamp, and creating a directory. This post explores instrumenting these actions.
@@ -33,9 +33,9 @@ The JMC Agent is typically used to instrument either library classes or a runnin
 ### The bootclasspath
 The JVM loads classes using `ClassLoader`s. `ClassLoaders` are layered - child `ClassLoaders` have access to all the classes in their parent `ClassLoader`. For a simplified discussion, assume that when the JVM starts, there are two `ClassLoaders`: the system `ClassLoader`, and it's parent, the boot `ClassLoader`. These load classes from the `classpath` and `bootclasspath` respectively.
 
-The `bootclasspath` contains classes essential for booting the JVM. Think `String`,  file IO to read classes from disk, ZIP classes for JAR loading/extraction, etc. The `classpath` contains everything else: the application, libraries, instrumentation agents, etc. Applications typically interact only with the system `ClassLoader` and have access to the classes on the `bootclasspath` through the parent relationship. However, we're interested in instrumenting classes on the `bootclasspath`, so things are a bit more interesting.
+The `bootclasspath` contains classes essential for booting the JVM. Think `String`, file IO to read classes from disk, ZIP classes for JAR loading/extraction, etc. The `classpath` contains everything else: the application, libraries, instrumentation agents, etc. Applications typically interact only with the system `ClassLoader` and have access to the classes on the `bootclasspath` through the parent relationship. However, we're interested in instrumenting classes on the `bootclasspath`, so things are a bit more interesting.
 
-When the JMC Agent instruments a class, it makes use of classes that are part of the JMC Agent JAR, which is part of the `classpath`. However, the classes we're interested in instrumenting are part of the `bootclasspath`, which doesn't have access to the `classpath` entries. Fortunately, it's possible to add JARs to the `bootclasspath`. We modify our `java` command to be `java -Xbootclasspath/a:/path/to/agent.jar`.
+When the JMC Agent instruments a class, it makes use of classes that are part of the JMC Agent JAR, which is part of the `classpath`. However, the classes we're concerned with instrumenting are part of the `bootclasspath`, which doesn't have access to the `classpath` entries. Fortunately, it's possible to add JARs to the `bootclasspath`. We modify our `java` command to be `java -Xbootclasspath/a:/path/to/agent.jar`.
 
 ### Java modules
 Java 9 introduced JPMS. The classes we're interested in instrumenting live in the `java.base` module. JFR events live in the `jdk.jfr` module. Notice that the [module graph](https://docs.oracle.com/en/java/javase/20/docs/api/java.base/module-summary.html) for `java.base` does not include `jdk.jfr`. The JMC Agent generates `jdk.jfr.Event` subclasses in the same module as classes being instrumented. This results in a runtime error: `java.lang.IllegalAccessError: superclass access check failed: class java.nio.file.fileioExists (in module java.base) cannot access class jdk.jfr.Event (in module jdk.jfr) because module java.base does not read module jdk.jfr`.
